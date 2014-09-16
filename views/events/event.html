@@ -1,0 +1,346 @@
+{{left_sidebar_enabled,right_sidebar_enabled=False,True}}
+{{extend 'layout.html'}}
+{{#=event}}
+<body onload="getLocation()">
+<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>
+<link rel="stylesheet" href="{{=URL('static','css/jquery.fancybox.css')}}" type="text/css" media="screen" />
+<script type="text/javascript" src="{{=URL('static','js/jquery.fancybox.pack.js')}}"></script>
+<script type="text/javascript">
+	var event_id = "{{=event.id}}";
+    function initialize() {
+        var myLatlng = new google.maps.LatLng(28.61, 77.23);
+        var mapOptions = {
+            zoom: 12,
+            center: myLatlng,
+            mapTypeId: google.maps.MapTypeId.ROADMAP
+        }
+        var map1 = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+
+        var marker = new google.maps.Marker({
+            position: myLatlng,
+            map: map1,
+            title: '{{=event.name}}'
+        });
+    }
+
+    google.maps.event.addDomListener(window, 'load', initialize);
+
+    var directionsDisplay;
+    var directionsService = new google.maps.DirectionsService();
+    var map;
+    var lati;
+    var longi;
+
+    function initial() {
+        directionsDisplay = new google.maps.DirectionsRenderer();
+        console.log("initial");
+        var delhi = new google.maps.LatLng(28.61, 77.23);
+        var mapOptions = {
+            zoom: 8,
+            mapTypeId: google.maps.MapTypeId.ROADMAP,
+            center: delhi
+        }
+        map = new google.maps.Map(document.getElementById('mapu'), mapOptions);
+        
+        directionsDisplay.setMap(map);
+        directionsDisplay.setPanel(document.getElementById('panel'));
+        
+    }
+
+    $(function(){
+		$("#nav-who").click(function(){
+			console.log("Booga");
+
+			setTimeout(function(){
+				var currCenter = map.getCenter();
+				google.maps.event.trigger(map,'resize');
+				map.setCenter(currCenter);
+			},1000);
+			
+		});
+	});
+
+$("#b").click(function(){
+
+		
+});    
+$(document).ready(function() {
+        $('.fancybox').fancybox();
+    });
+
+    function getLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function (position) {
+                lati = position.coords.latitude;
+                longi = position.coords.longitude;
+            });
+        } else {
+            x.innerHTML = "Geolocation is not supported by this browser.";
+        }
+    }
+
+    function calcroute() {
+    	
+        var start = new google.maps.LatLng(lati, longi);
+        var end = new google.maps.LatLng(28.54442, 77.19696);
+
+        var request = {
+            origin: start,
+            destination: end,
+            travelMode: google.maps.DirectionsTravelMode.DRIVING
+        };
+        directionsService.route(request, function (response, status) {
+            if (status == google.maps.DirectionsStatus.OK) {
+                directionsDisplay.setDirections(response);
+            }
+        });
+    }
+    google.maps.event.addDomListener(window, 'load', initial);
+    $(function() {
+	$("#nav-who").click(function() {
+		if ($("#content-top").hasClass("active")) {
+			$("#content-top").slideUp(500);
+			$("#content-top").removeClass("active");
+
+		} else {
+			$("#content-top").slideDown(500);
+			
+			$("#content-top").addClass("active");
+		}
+	});
+	$("#feed_submit").click(function(){
+		$(".feedback").css('display','none');
+		$("#success_feed").css('display','block');
+	});
+	$(".click_feedback").click(function(){
+		$(".feedback").css('display','block');
+		$("#success_feed").css('display','none');
+	});
+});
+$(function(){
+    	var heart_fill = "{{=URL('static','images/heart_fill.png')}}";
+    	var heart_empty = "{{=URL('static','images/heart_empty.png')}}";
+    	
+    	$("#bookmark").click(function(){
+    		if ($(this).attr('src')==heart_empty){
+    			$.ajax({'url':'{{=URL("events","addbookmark")}}','data':'insert=1&eventid='+event_id,'success':function(data) {
+    					console.log(data.success);
+    				}
+
+    			});
+    			$(this).attr('src',heart_fill);
+    		}
+    		else {
+    			$.ajax({'url':'{{=URL("events","addbookmark")}}','data':'insert=0&eventid='+event_id,'success':function(data) {
+    					console.log(data.success);
+    				}
+    			});
+    			$(this).attr('src',heart_empty);
+    		}
+    	});	
+});
+</script>
+
+
+<section id="content-top" style="position:relative;top:0px;display:none;">
+	
+	<div id="panel" style="width: 300px;float:left;overflow:auto;height:500px;"></div>
+	<div id="mapu" style="width:460px;height:500px;float:right;margin-top:1%;"></div>
+</section>
+
+<img class="cover_pic" src="{{=event.image_url}}">
+<div id="name_book">
+
+	<div>
+		<h1>{{=event.name}}</h1>
+		<div style="float:right;margin-top:-6%;">
+            {{from random import choice}}
+			<button class="btn btn-warning">{{=choice(range(100,140))}} Want to attend</button>
+    		<button class="btn btn-success">{{=choice(range(40,100))}} Attending</button>
+		</div>
+	</div>
+    {{if db(db.tags.event_==event.id).count():}}
+    	<div class="btn-group">
+            {{for i,tag in enumerate(db(db.tags.event_==event.id).select().first().tags.split(';')):}}
+                {{if i<4:}}
+                    <a href="#myTweets" role="button" class="btn" data-toggle="modal">#{{=tag}}</a>
+                {{pass}}
+            {{pass}}
+    	</div>
+    <br>
+    
+    {{pass}}
+	
+    
+    <div style="float:right">
+        <ul class="nav nav-pills nav-stacked" style="border-radius:15px;width:100px;clear:none;float:left;margin-top:4px;">
+          <li class="active">
+            <a href="#">
+              <span class="badge pull-right">{{=event.buzz}}</span>
+              Buzz
+            </a>
+          </li>
+        </ul>
+    </div>
+	
+		
+	<div style="float:right;">
+		<img id="bookmark" src="{{=URL('static','images/heart_fill.png' if bookmarked else 'images/heart_empty.png')}}" style="margin-right:10px"></img>
+	</div>
+
+	<div style="float:right;">
+		<a href="http://www.facebook.com/login" target="_blank">
+        	<img src="{{=URL('static','images/connectToFb.png')}}" style="padding-right: 10px;margin-top: 5px;"/>
+    	</a>
+	</div>
+</div>
+<br>
+
+
+<div class="tabbable"> 
+  <ul class="nav nav-tabs">
+    <li class="active"><a href="#tab1" data-toggle="tab">Description</a></li>
+    <li><a href="#tab2" data-toggle="tab">Gallery</a></li>
+    <li><a href="#tab3" data-toggle="tab">Reviews</a></li>
+    <li><a href="#tab4" data-toggle="tab">Weather</a></li>
+    <li class="click_feedback"><a href="#tab5" data-toggle="tab">Feedback</a></li>
+  </ul>
+
+  <div class="tab-content">
+    <div class="tab-pane description active" id="tab1">
+      <p>{{=event.description}}</p>
+    </div>
+    <div class="tab-pane" id="tab2">
+
+    <a href="{{=URL('static','images/facebook.png')}}" class="fancybox" rel="gallery" title="Sample title 1"><img src="{{=URL('static','images/facebook.png')}}" /></a>
+	<a href="{{=URL('static','images/hackathon_tn.png')}}" class="fancybox" rel="gallery" title="Sample title 1"><img src="{{=URL('static','images/hackathon_tn.png')}}" /></a>
+	<a href="{{=URL('static','images/hacku_tn.png')}}" class="fancybox" rel="gallery" title="Sample title 1"><img src="{{=URL('static','images/hacku_tn.png')}}" /></a>
+
+
+    </div>
+    <div class="tab-pane" id="tab3">
+      <p>
+        <h3>Rate the Event</h3>
+        <img  src="{{=URL('static','images/review.png')}}"/>
+      </p>
+    </div>
+    <div class="tab-pane" id="tab4">
+
+      <p>
+          <img src="{{=URL('static','images/weather.png')}}">
+      </p>
+
+    </div>
+    <div class="tab-pane" id="tab5">
+    <h1>I suggest you..</h1>
+    <div class="feedback">
+		<div class="input-group">
+		  <input type="text" class="form-control input-lg" placeholder="Enter Your Idea">
+
+		</div>
+		<div class="input-group">
+			<input type="text" class="form-control input-lg" placeholder="Describe Your Idea" style="height:120px;">
+		</div>
+		<div class="input-group">
+			<input type="text" class="form-control input-lg" placeholder="Email Address">
+		</div>
+		<button class="btn" id="feed_submit">Submit</button>
+
+	</div>
+	<div class="alert alert-success" id="success_feed" style="display:none;">
+		Thanks for your Feedback!!
+	</div>
+    </div>
+  </div>
+</div>
+
+<div id="myTweets" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        <h3 id="myModalLabel">Tweets #hack</h3>
+      </div>
+      <div class="modal-body">
+        <div id="module-results" data-module="results" class="module" data-model="search"><div id="results-new-status" class="alert alert-info" style="display: none;"><button id="results-new-button" class="btn btn-link"></button></div><div id="results-new"></div><div id="results"><div class="result-tweet"><div class="media"><a class="pull-left" href="http://twitter.com/ntisec"><img class="media-object img-polaroid" src="http://a0.twimg.com/profile_images/2188036855/Dutchanon_normal.jpg" width="48" height="48"></a><div class="media-body"><h5 class="media-heading"><a href="http://twitter.com/ntisec">Freedom of Info 4ALL</a> <small>@ntisec</small> </h5><div><a href="/s?q=BREAKING" data-hashtag="#BREAKING">#BREAKING</a> <a href="/s?q=Dutch" data-hashtag="#Dutch">#Dutch</a> <a href="/s?q=DNS" data-hashtag="#DNS">#DNS</a> server '<a href="/s?q=hack" data-hashtag="#hack">#hack</a>': Thousands of sites serve up <a href="/s?q=malware" data-hashtag="#malware">#malware</a> <a href="http://t.co/9zgtP40WWV">zd.net/1czhkDH</a> <a href="/s?q=Nederlands" data-hashtag="#Nederlands">#Nederlands</a> Idiots. This is the 2nd time</div><ul class="inline"><li><small><a href="http://twitter.com/ntisec/status/365788365775323136" class="muted"><span class="icon-twitter"></span> <span class="relative-date" data-timestamp="1376045717">2 days ago</span></a></small></li><li><small><a href="https://twitter.com/intent/tweet?in_reply_to=365788365775323136" class="muted"><span class="icon-reply"></span>Reply</a></small></li><li><small><a href="https://twitter.com/intent/retweet?tweet_id=365788365775323136" class="muted"><span class="icon-retweet"></span>Retweet</a></small></li><li><small><a href="https://twitter.com/intent/favorite?tweet_id=365788365775323136" class="muted"><span class="icon-star-empty"></span>Favorite</a></small></li><li><small><a href="/trackback?url=http%3A%2F%2Ftwitter.com%2Fntisec%2Fstatus%2F365788365775323136" class="trackback-link"><span class="icon-comment-alt"></span>16 more</a></small></li></ul></div></div></div><div class="result-tweet"><div class="media"><a class="pull-left" href="http://twitter.com/bur_rizzoli"><img class="media-object img-polaroid" src="http://a0.twimg.com/profile_images/3596116859/fcaf611d2916b6dc36b32b84788419d1_normal.jpeg" width="48" height="48"></a><div class="media-body"><h5 class="media-heading"><a href="http://twitter.com/bur_rizzoli">BUR Rizzoli</a> <small>@bur_rizzoli</small> </h5><div>In attesa della notte di <a href="/s?q=SanLorenzo" data-hashtag="#SanLorenzo">#SanLorenzo</a>, un pensiero a Margherita <a href="/s?q=Hack" data-hashtag="#Hack">#Hack</a> e alla sua vita tra le stelle | <a href="http://twitter.com/FedericoTaddia" target="_blank" data-username="@FedericoTaddia">@FedericoTaddia</a> <a href="http://t.co/86CcvXDIxr">ow.ly/i/2NWjP</a></div><ul class="inline"><li><small><a href="http://twitter.com/BUR_Rizzoli/status/366243086885593088" class="muted"><span class="icon-twitter"></span> <span class="relative-date" data-timestamp="1376154131">6 hours ago</span></a></small></li><li><small><a href="https://twitter.com/intent/tweet?in_reply_to=366243086885593088" class="muted"><span class="icon-reply"></span>Reply</a></small></li><li><small><a href="https://twitter.com/intent/retweet?tweet_id=366243086885593088" class="muted"><span class="icon-retweet"></span>Retweet</a></small></li><li><small><a href="https://twitter.com/intent/favorite?tweet_id=366243086885593088" class="muted"><span class="icon-star-empty"></span>Favorite</a></small></li><li><small><a href="/trackback?url=http%3A%2F%2Ftwitter.com%2Fbur_rizzoli%2Fstatus%2F366243086885593088" class="trackback-link"><span class="icon-comment-alt"></span>34 more</a></small></li></ul></div></div></div><div class="result-tweet"><div class="media"><a class="pull-left" href="http://twitter.com/cezex"><img class="media-object img-polaroid" src="http://a0.twimg.com/profile_images/3601674769/78813d139291244bd19c3e09e2b2714b_normal.png" width="48" height="48"></a><div class="media-body"><h5 class="media-heading"><a href="http://twitter.com/cezex">Cezex</a> <small>@cezex</small> </h5><div>beakpi <a href="https://t.co/vpmABr0SYs">github.com/beakable/BeakPi</a> <a href="/s?q=DIY" data-hashtag="#DIY">#DIY</a> Your Own Home Audio and Lighting Automation with a <a href="/s?q=RaspberryPi" data-hashtag="#RaspberryPi">#RaspberryPi</a> <a href="http://t.co/p4titJftwk">youtube.com/watch?v=8AcSKF…</a> <a href="/s?q=hack" data-hashtag="#hack">#hack</a></div><ul class="inline"><li><small><a href="http://twitter.com/cezex/status/366251865429647362" class="muted"><span class="icon-twitter"></span> <span class="relative-date" data-timestamp="1376156224">5 hours ago</span></a></small></li><li><small><a href="https://twitter.com/intent/tweet?in_reply_to=366251865429647362" class="muted"><span class="icon-reply"></span>Reply</a></small></li><li><small><a href="https://twitter.com/intent/retweet?tweet_id=366251865429647362" class="muted"><span class="icon-retweet"></span>Retweet</a></small></li><li><small><a href="https://twitter.com/intent/favorite?tweet_id=366251865429647362" class="muted"><span class="icon-star-empty"></span>Favorite</a></small></li><li><small><a href="/trackback?url=http%3A%2F%2Ftwitter.com%2Fcezex%2Fstatus%2F366251865429647362" class="trackback-link"><span class="icon-comment-alt"></span>5 more</a></small></li></ul></div></div></div><div class="result-tweet"><div class="media"><a class="pull-left" href="http://twitter.com/harryterjanian"><img class="media-object img-polaroid" src="http://a0.twimg.com/profile_images/3502697300/8caf00ccb7bd18219420ef7803283f47_normal.jpeg" width="48" height="48"></a><div class="media-body"><h5 class="media-heading"><a href="http://twitter.com/harryterjanian">Harry Terjanian</a> <small>@harryterjanian</small> </h5><div>Youtube "comedian" caught stealing Amy Schumer's material without giving credit.  <a href="http://t.co/kyZuPRRpbW">youtube.com/watch?v=SZGtJG…</a>
+<a href="/s?q=Jokethief" data-hashtag="#Jokethief">#Jokethief</a> <a href="/s?q=hack" data-hashtag="#hack">#hack</a> <a href="/s?q=material" data-hashtag="#material">#material</a></div><ul class="inline"><li><small><a href="http://twitter.com/HarryTerjanian/status/365823597543047168" class="muted"><span class="icon-twitter"></span> <span class="relative-date" data-timestamp="1376054116">a day ago</span></a></small></li><li><small><a href="https://twitter.com/intent/tweet?in_reply_to=365823597543047168" class="muted"><span class="icon-reply"></span>Reply</a></small></li><li><small><a href="https://twitter.com/intent/retweet?tweet_id=365823597543047168" class="muted"><span class="icon-retweet"></span>Retweet</a></small></li><li><small><a href="https://twitter.com/intent/favorite?tweet_id=365823597543047168" class="muted"><span class="icon-star-empty"></span>Favorite</a></small></li><li><small><a href="/trackback?url=http%3A%2F%2Ftwitter.com%2Fharryterjanian%2Fstatus%2F365823597543047168" class="trackback-link"><span class="icon-comment-alt"></span>4 more</a></small></li></ul></div></div></div><div class="result-tweet"><div class="media"><a class="pull-left" href="http://twitter.com/josepapo"><img class="media-object img-polaroid" src="http://a0.twimg.com/profile_images/2883014368/453cc6e5ec5dac81cfc01b0199211255_normal.png" width="48" height="48"></a><div class="media-body"><h5 class="media-heading"><a href="http://twitter.com/josepapo">José Papo</a> <small>@josepapo</small> </h5><div>“<a href="http://twitter.com/AWSstartups" target="_blank" data-username="@AWSstartups">@AWSstartups</a>: How hackathons could save the world - via <a href="http://twitter.com/RWW" target="_blank" data-username="@RWW">@RWW</a> <a href="http://t.co/afERk8DQ2h">bit.ly/16ALPTP</a> - love this! <a href="/s?q=AWS" data-hashtag="#AWS">#AWS</a> <a href="/s?q=startups" data-hashtag="#startups">#startups</a> <a href="/s?q=hack”" data-hashtag="#hack”">#hack”</a></div><ul class="inline"><li><small><a href="http://twitter.com/josepapo/status/365988098968010752" class="muted"><span class="icon-twitter"></span> <span class="relative-date" data-timestamp="1376093337">a day ago</span></a></small></li><li><small><a href="https://twitter.com/intent/tweet?in_reply_to=365988098968010752" class="muted"><span class="icon-reply"></span>Reply</a></small></li><li><small><a href="https://twitter.com/intent/retweet?tweet_id=365988098968010752" class="muted"><span class="icon-retweet"></span>Retweet</a></small></li><li><small><a href="https://twitter.com/intent/favorite?tweet_id=365988098968010752" class="muted"><span class="icon-star-empty"></span>Favorite</a></small></li><li><small><a href="/trackback?url=http%3A%2F%2Ftwitter.com%2Fjosepapo%2Fstatus%2F365988098968010752" class="trackback-link"><span class="icon-comment-alt"></span>4 more</a></small></li></ul></div></div></div><div class="result-tweet"><div class="media"><a class="pull-left" href="http://twitter.com/delinet"><img class="media-object img-polaroid" src="http://a0.twimg.com/profile_images/112615671/D_Picture-JPG_normal.png" width="48" height="48"></a><div class="media-body"><h5 class="media-heading"><a href="http://twitter.com/delinet">Antonio Candela</a> <small>@delinet</small> </h5><div>Kids <a href="/s?q=geek" data-hashtag="#geek">#geek</a> rule the future. Maybe we come back at <a href="/s?q=commodore64" data-hashtag="#commodore64">#commodore64</a> time. In <a href="/s?q=hack" data-hashtag="#hack">#hack</a> I trust ! <a href="http://t.co/w7mCLbGvAY">raspberrypi.org/archives/4573</a> <a href="/s?q=RaspberryPi" data-hashtag="#RaspberryPi">#RaspberryPi</a> <a href="/s?q=develop" data-hashtag="#develop">#develop</a></div><ul class="inline"><li><small><a href="http://twitter.com/Delinet/status/365847196278599681" class="muted"><span class="icon-twitter"></span> <span class="relative-date" data-timestamp="1376059743">a day ago</span></a></small></li><li><small><a href="https://twitter.com/intent/tweet?in_reply_to=365847196278599681" class="muted"><span class="icon-reply"></span>Reply</a></small></li><li><small><a href="https://twitter.com/intent/retweet?tweet_id=365847196278599681" class="muted"><span class="icon-retweet"></span>Retweet</a></small></li><li><small><a href="https://twitter.com/intent/favorite?tweet_id=365847196278599681" class="muted"><span class="icon-star-empty"></span>Favorite</a></small></li><li><small><a href="/trackback?url=http%3A%2F%2Ftwitter.com%2Fdelinet%2Fstatus%2F365847196278599681" class="trackback-link"><span class="icon-comment-alt"></span>3 more</a></small></li></ul></div></div></div><div class="result-tweet"><div class="media"><a class="pull-left" href="http://twitter.com/sergeidagda"><img class="media-object img-polaroid" src="http://a0.twimg.com/profile_images/378800000097542186/a438f06da049b7c88819e39cb0817654_normal.jpeg" width="48" height="48"></a><div class="media-body"><h5 class="media-heading"><a href="http://twitter.com/sergeidagda">Sergei DAGDA</a> <small>@sergeidagda</small> </h5><div><a href="http://t.co/BbpdzQOmFD">cheapdreheadphonessale.com/hack-e-mail-3-…</a> <a href="/s?q=hack" data-hashtag="#hack">#hack</a> e mail 3 crack</div><ul class="inline"><li><small><a href="http://twitter.com/SergeiDAGDA/status/365802877207314434" class="muted"><span class="icon-twitter"></span> <span class="relative-date" data-timestamp="1376049176">a day ago</span></a></small></li><li><small><a href="https://twitter.com/intent/tweet?in_reply_to=365802877207314434" class="muted"><span class="icon-reply"></span>Reply</a></small></li><li><small><a href="https://twitter.com/intent/retweet?tweet_id=365802877207314434" class="muted"><span class="icon-retweet"></span>Retweet</a></small></li><li><small><a href="https://twitter.com/intent/favorite?tweet_id=365802877207314434" class="muted"><span class="icon-star-empty"></span>Favorite</a></small></li><li><small><a href="/trackback?url=http%3A%2F%2Ftwitter.com%2Fsergeidagda%2Fstatus%2F365802877207314434" class="trackback-link"><span class="icon-comment-alt"></span>1 more</a></small></li></ul></div></div></div><div class="result-tweet"><div class="media"><a class="pull-left" href="http://twitter.com/awsstartups"><img class="media-object img-polaroid" src="http://a0.twimg.com/profile_images/3627769416/216a93c11c5e19bf09a76878570c65c3_normal.png" width="48" height="48"></a><div class="media-body"><h5 class="media-heading"><a href="http://twitter.com/awsstartups">AWS startups</a> <small>@awsstartups</small> </h5><div>How hackathons could save the world - via <a href="http://twitter.com/RWW" target="_blank" data-username="@RWW">@RWW</a> <a href="http://t.co/F50WcXievn">bit.ly/16ALPTP</a> - love this! <a href="/s?q=AWS" data-hashtag="#AWS">#AWS</a> <a href="/s?q=startups" data-hashtag="#startups">#startups</a> <a href="/s?q=hack" data-hashtag="#hack">#hack</a></div><ul class="inline"><li><small><a href="http://twitter.com/AWSstartups/status/365974925539946499" class="muted"><span class="icon-twitter"></span> <span class="relative-date" data-timestamp="1376090196">a day ago</span></a></small></li><li><small><a href="https://twitter.com/intent/tweet?in_reply_to=365974925539946499" class="muted"><span class="icon-reply"></span>Reply</a></small></li><li><small><a href="https://twitter.com/intent/retweet?tweet_id=365974925539946499" class="muted"><span class="icon-retweet"></span>Retweet</a></small></li><li><small><a href="https://twitter.com/intent/favorite?tweet_id=365974925539946499" class="muted"><span class="icon-star-empty"></span>Favorite</a></small></li><li><small><a href="/trackback?url=http%3A%2F%2Ftwitter.com%2Fawsstartups%2Fstatus%2F365974925539946499" class="trackback-link"><span class="icon-comment-alt"></span>4 more</a></small></li></ul></div></div></div><div class="result-tweet"><div class="media"><a class="pull-left" href="http://twitter.com/nathandrill"><img class="media-object img-polaroid" src="http://a0.twimg.com/profile_images/3476491903/8c4bfe74dab9ac54c8c16f6c26a222e7_normal.jpeg" width="48" height="48"></a><div class="media-body"><h5 class="media-heading"><a href="http://twitter.com/nathandrill">Nathan Drill</a> <small>@nathandrill</small> </h5><div>@GMOSeralini "How to abuse rats: The Seralini Story"  How much is he going to charge for this festival of ignorance?  #Shameful #Hack</div><ul class="inline"><li><small><a href="http://twitter.com/NathanDrill/status/365715628402810880" class="muted"><span class="icon-twitter"></span> <span class="relative-date" data-timestamp="1376028375">2 days ago</span></a></small></li><li><small><a href="https://twitter.com/intent/tweet?in_reply_to=365715628402810880" class="muted"><span class="icon-reply"></span>Reply</a></small></li><li><small><a href="https://twitter.com/intent/retweet?tweet_id=365715628402810880" class="muted"><span class="icon-retweet"></span>Retweet</a></small></li><li><small><a href="https://twitter.com/intent/favorite?tweet_id=365715628402810880" class="muted"><span class="icon-star-empty"></span>Favorite</a></small></li><li><small><a href="/trackback?url=http%3A%2F%2Ftwitter.com%2Fnathandrill%2Fstatus%2F365715628402810880" class="trackback-link"><span class="icon-comment-alt"></span>3 more</a></small></li></ul></div></div></div><div class="result-tweet"><div class="media"><a class="pull-left" href="http://twitter.com/mtacons"><img class="media-object img-polaroid" src="http://a0.twimg.com/profile_images/3461067399/265bfee42df063be1b9fb12786542740_normal.jpeg" width="48" height="48"></a><div class="media-body"><h5 class="media-heading"><a href="http://twitter.com/mtacons">conmta</a> <small>@mtacons</small> </h5><div><a href="/s?q=Cybercriminals" data-hashtag="#Cybercriminals">#Cybercriminals</a> <a href="/s?q=Hack" data-hashtag="#Hack">#Hack</a> Into Factory <a href="http://t.co/BVvDgY9Hwx">flip.it/iAVQa</a> <a href="/s?q=infosec" data-hashtag="#infosec">#infosec</a> <a href="/s?q=cybersecurity" data-hashtag="#cybersecurity">#cybersecurity</a></div><ul class="inline"><li><small><a href="http://twitter.com/mtacons/status/366259736234045440" class="muted"><span class="icon-twitter"></span> <span class="relative-date" data-timestamp="1376158100">5 hours ago</span></a></small></li><li><small><a href="https://twitter.com/intent/tweet?in_reply_to=366259736234045440" class="muted"><span class="icon-reply"></span>Reply</a></small></li><li><small><a href="https://twitter.com/intent/retweet?tweet_id=366259736234045440" class="muted"><span class="icon-retweet"></span>Retweet</a></small></li><li><small><a href="https://twitter.com/intent/favorite?tweet_id=366259736234045440" class="muted"><span class="icon-star-empty"></span>Favorite</a></small></li><li><small><a href="/trackback?url=http%3A%2F%2Ftwitter.com%2Fmtacons%2Fstatus%2F366259736234045440" class="trackback-link"><span class="icon-comment-alt"></span>2 more</a></small></li></ul></div></div></div></div><div id="results-video-modal" class="modal hide fade"><div class="modal-body"></div><div class="modal-footer"><button class="btn" data-dismiss="modal">Close</button></div></div></div>
+      </div>
+      <div class="modal-footer">
+        <button style="margin-top:-22px" class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+        <a style="margin-top:-22px" class="btn" title="send to Facebook" 
+          href="http://www.facebook.com/sharer.php?s=100&ptitle=YOUR_TITLE&p[summary]=YOUR_SUMMARY&p[url]=YOUR_URL&p[images[0]=YOUR_IMAGE_TO_SHARE_OBJECT"
+          target="_blank">
+          <span>
+            <img style="width:20px" src="{{=URL('static','images/Facebook_icon.png')}}" alt="Facebook" /> Facebook 
+          </span>
+        </a>
+        <a href="https://twitter.com/intent/tweet?button_hashtag=Hack&text=Attending%20this%20cool%20event%20at%20%40evento" class="twitter-hashtag-button" data-size="large" data-related="evento">Tweet #Hack</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+      </div>
+    </div>
+{{block right_sidebar}}
+	<center>
+		<ul class="thumbnails">
+			<li onclick ="calcroute()" class="tile tile-double" id="nav-who" style="width: 85%;height: 60px;margin-top: 3%;">
+				<a>
+					<h1>Take me to event</h1>
+				</a>
+				
+			</li>
+			
+		</ul>
+		<h2 style="margin-top: -1%;margin-left: 4%;position: absolute;">Add to Calendar</h2>
+		<ul class="thumbnails" style="margin-top: 12%;">
+    		<li class="span3 tile tile-green" style="height:65px;width:38%;">
+        		<a href="{{=gc}}" target="_blank">
+            		<h1>Google</h1>
+        		</a>
+    		</li>
+    		<li class="span3 tile tite-purple" style="height:65px;width:37%;background:purple">
+        		<a href="{{=yc}}" target="_blank">
+            		<h1>Yahoo</h1>
+        		</a>
+    		</li>
+		</ul>
+	    
+	    <!--a href="" class='btn rbb'>Add to google calender</a-->
+	    <div class="location" style="width:100%;">
+	    	<div id="map-canvas" style="width:350px;height:245px;margin-left: -20px;"></div>
+	    	<div id="loc_info">
+	    		<table class="table table-bordered">
+	    			<tbody>
+                        <tr>
+                            <td>Start time</td>
+                            <td>{{=event.start_time}}</td>
+                        </tr>
+                        <tr>
+                            <td>End time</td>
+                            <td>{{=event.end_time}}</td>
+                        </tr>
+	    				<tr>
+	    					<td>Institute</td>
+	    					<td>{{=event.institute}}</td>
+	    				</tr>
+	    				<tr>
+	    					<td>Organiser</td>
+	    					<td>{{=event.organisers}}</td>
+	    				</tr>
+	    				<tr>
+	    					<td>Phone</td>
+	    					<td>{{=event.o_phone}}</td>
+	    				</tr>
+                        <tr>
+                            <td>website</td>
+                            <td><a href="http://{{=event.o_website}}">{{=event.o_website}}</a></td>
+                        </tr>
+                        <tr>
+                            <td>Fees</td>
+                            <td>{{="Free" if event.fees<1 else "%s Rs" %event.fees}}</td>
+                        </tr>
+	    			</tbody>
+	    		</table>
+	    	</div>
+	    </div>
+	    <!--a href="" class='btn rbb'>Add to Yahoo calender</a-->
+	</center>
+
+{{end}}

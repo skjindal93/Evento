@@ -1,0 +1,53 @@
+*{
+	font-family: "Segoe UI Light", "Helvetica Neue", "Segoe UI", "Segoe WP", sans-serif;
+}
+.input{
+    width:300px;
+}
+#edesc2{
+    height:100px;
+}
+body{
+    background-color:#eee;
+}
+body>div.container{
+    background: white;
+    padding-right: 20px;
+    padding-left: 20px;
+}
+#right_side_bar{
+	/*background: yellow;*/
+}
+.thumbnails > li.tile.tile-double{
+	width: 360px;
+}
+
+.navbar-inner{
+	padding-bottom: 0px;
+	max-height: 50px;
+}
+img.cover_pic{
+	width:770px;
+	max-height: 225px;
+}
+.brand>b{
+	padding-bottom: 0px;
+	font-size: 35px;
+}
+#search_bar{
+	width: 350px;
+	border-radius: 15px;
+}
+.navbar .nav>li{
+	margin-left: -25px;
+}
+.addnewbutton{
+	border-radius: 15px;
+}
+[class^="icon-"], [class*=" icon-"]{
+	width: 25px;
+	margin-top: 15px;
+}
+.navbar-inverse .brand, .navbar-inverse .nav>li>a{
+	margin-left: 5px;
+}

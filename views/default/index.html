@@ -1,0 +1,132 @@
+{{left_sidebar_enabled,right_sidebar_enabled=False,False}}
+{{extend 'layout.html'}}
+<style type="text/css">
+    .rbb{
+        margin-top: 10px;
+    }
+</style>
+<!-- Masthead ================================================== -->
+    <!-- <header class="mastheader row" id="header">
+      {{if response.title:}}
+        <div class="span12">
+            <div class="page-header">
+                <h1>
+                    {{=response.title}}
+                    <small>{{=response.subtitle or ''}}</small>
+                </h1>
+            </div>
+        </div>
+       {{pass}}
+    </header> -->
+
+<!-- <h3>{{=message}}</h3>
+
+<h4>{{=T('How did you get here?')}}</h4>
+<ol>
+  <li>{{=T('You are successfully running web2py')}}</li>
+  <li>{{=XML(T('You visited the url %s', A(request.env.path_info,_href=request.env.path_info)))}}</li>
+  <li>{{=XML(T('Which called the function %s located in the file %s',
+             (A(request.function+'()',_href='#'),
+              A('web2py/applications/%(application)s/controllers/%(controller)s.py'%request,
+               _href=URL('admin','default','peek', args=(request.application,'controllers',request.controller+'.py'))))))}}</li>
+  <li>{{=XML(T('The output of the file is a dictionary that was rendered by the view %s',
+           A('web2py/applications/%(application)s/views/%(controller)s/index.html'%request,
+           _href=URL('admin','default','peek',args=(request.application,'views',request.controller,'index.html')))))}}</li>
+  <li>{{=T('You can modify this application and adapt it to your needs')}}</li>
+</ol>
+ -->
+<!-- Right Side Bar -->
+<!-- <center>
+    <a href="" class='btn rbb'>Take me to the event</a>
+    <br>
+    <a href="" class='btn rbb'>Add to google calender</a>
+    <br>
+    <a href="" class='btn rbb'>Add to Yahoo calender</a>
+</center>
+ -->
+ <h2>Trending Events</h2>
+ <script type="text/javascript">
+ $(function() {
+     $('.tile-double').hover(function() {
+        var tdouble = this;
+        $(this).find('.tile-up').slideUp(function() {
+            $($(tdouble)).find('.tile-down').slideDown();
+        });
+     });
+
+     $('.tile-double').mouseleave(function() {
+        var tdouble = this;
+        $(this).find('.tile-up').slideDown(function() {
+            $(tdouble).find('.tile-up').stop(true,true);
+        });
+     });
+ })
+ </script>
+ {{tile_colors = ["tile-orange","tile-teal","tile-blue","tile-green","tile-red","tile-purple","tile-magenta",""]}} <!-- ,"tile-pink" -->
+  Search with 
+<div class="btn-group">
+  <button class="btn btn-default btn-sm dropdown-toggle" type="button" data-toggle="dropdown">
+    Category <span class="caret"></span>
+  </button>
+  <ul class="dropdown-menu">
+    <li><a href="{{=URL()}}">Science</a></li>
+    <li><a href="{{=URL()}}">Culture</a></li>
+    <li><a href="{{=URL()}}">Health</a></li>
+    <li><a href="{{=URL()}}">Media</a></li>
+    <li><a href="{{=URL()}}">Economic</a></li>
+    <li><a href="{{=URL()}}">Energy</a></li>
+    <li><a href="{{=URL()}}">Environment</a></li>
+    <li><a href="{{=URL()}}">Industry</a></li>
+    <li><a href="{{=URL()}}">Transport</a></li>
+    <li><a href="{{=URL()}}">Institutions</a></li>
+    <li><a href="{{=URL()}}">Agriculture</a></li>
+    <li><a href="{{=URL()}}">Justice</a></li>
+    <li><a href="{{=URL()}}">Competition</a></li>
+  </ul>
+</div>
+ <br>
+ <br>
+<ul class="thumbnails" >
+    {{for i,event in enumerate(events):}}
+        <li class='{{="tile tile-double %s" % tile_colors[i]}}' style="overflow:hidden">
+            <a href="{{=URL('events','event/%s'%event.name.replace(" ","_"))}}" style="overflow:auto">
+                <div class="tile-up">
+                    {{image=event.image_url.split('.')}}
+                    <table>
+                        <tr>
+                            <td>
+                                <img src="{{='%s_tn.%s' % (image[0].lower(),image[1].lower())}}" style="max-width:110px;max-height:110px">
+                            </td>
+                            <td>
+                                <h2>{{=event.name.title()}}</h2>
+                                <h4>In {{=readable_time(event.start_time)}}</h4>
+                                <h4><span style="color:black">#{{=i+1}}</span style="color:black"> Buzz:{{=event.buzz}}</h4>
+                            </td>
+                        </tr>
+                    </table>
+                    <br>
+                    <br>
+                </div>
+                <div class="tile-down" style="color:white">
+                    <br>
+                    <h4>{{=event.venue}} {{=event.institute}}</h4>
+                    <div style="color:white">
+                        In {{=readable_time(event.start_time)}} for {{=readable_time(event.start_time,event.end_time)}}
+                        <br>{{=", ".join(map(lambda x: "#"+x,db(db.tags.event_==event.id).select().first().tags.split(';')[:6]))}}
+                    </div> 
+                </div>
+            </a>
+        </li>
+    {{pass}}
+</ul>
+<!-- {{=A(T("Administrative Interface"), _href=URL('admin','default','index'), _class='btn',
+     _style='margin-top: 1em;')}}
+<h6>{{=T("Don't know what to do?")}}</h6>
+<ul>
+  <li>{{=A(T("Online examples"), _href=URL('examples','default','index'))}}</li>
+  <li><a href="http://web2py.com">web2py.com</a></li>
+  <li><a href="http://web2py.com/book">{{=T('Documentation')}}</a></li>
+</ul>
+ -->
+{{block right_sidebar}}
+{{end}}

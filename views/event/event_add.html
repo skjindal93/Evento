@@ -1,0 +1,62 @@
+{{extend 'layout.html'}}
+<head>
+<link rel="stylesheet" type="text/css" href="{{=URL('static','css/style.css')}}">
+<script>
+function showcat(cat)
+{
+    
+    if(cat=='fest')
+    {
+    document.getElementById('catt1').style.display='';
+    document.getElementById('catt2').style.display='';
+    }else
+    {document.getElementById('catt1').style.display='none';
+    document.getElementById('catt2').style.display='none';
+    }
+}
+</script>
+</head>
+<form action="/Evento/event/addevent" enctype="multipart/form-data" method="post">
+<br>
+<table>
+	<tr>
+		<td>Upload an event pic:</td>
+		<td>
+			<input name="_formname" type="hidden" value="image_form">
+			<input class="upload" name="image_file" type="file">
+		</td>
+	</tr>
+    <tr><td>Event Name:</td><td><input name="ename" class='input' id="ename2"></input></td>
+    <tr><td>Event Description:</td><td><input name="edesc" class='input' id="edesc2"></input></td>
+    <tr><td>Start time:</td><td><input type="date" name="stime" class='input2' id="stime2"></input></td>
+    <tr><td>End time:</td><td><input type="date" name="etime" class='input2' id="etime2"></input></td>
+    <tr>
+        <td>Category :</td><td><select name='category' onchange='showcat(this.value)'>";
+    <option value='None selected'>None selected</option>
+    <option value='fest'> Fest</option>
+    <option value='concert'>Concert</option>
+    </select>
+    </td></tr>
+    <tr>
+        <td id='catt1' style='display:none;'>Fest name:</td>
+        <td id='catt2' style='display:none;'>
+            <input name="fest" class='input' id="fest"></input>
+        </td>
+    </tr>
+    <tr><td>Venue:</td><td><input name="venue" class='input' id="venue2"></input></td>
+    <tr><td>Street Address:</td><td><input name="saddress" class='input' id="saddress2"></input></td>
+    <tr><td>Institution:</td><td><input name="insti" class='input' id="insti2"></input></td>
+    <tr><td>City:</td><td><input name="city" class='input' id="city2"></input></td>
+    <tr><td>State:</td><td><input name="state" class='input' id="state2"></input></td>
+    <tr><td>Pin Code:</td><td><input name="pcode" class='input' id="pcode2"></input></td>
+    <tr><td>Website link:</td><td><input name="wlink" class='input' id="wlink2"></input></td>
+    <tr><td>Fees(if any):</td><td><input name="fee" class='input' id="fee2"></input></td>
+    <tr><td>Tags (seperate by ' ; ' ):</td><td><input name="tag" class='input' id="tag2"></input></td>
+    <tr><td>Organisers:</td><td></td>
+    <tr><td>Name:</td><td><input name="oname" class='input' id="oname2"></input></td>
+    <tr><td>Phone:</td><td><input name="ophone" class='input' id="ophone2"></input></td>
+    <tr><td>Email id:</td><td><input name="eid" class='input' id="eid2"></input></td>
+
+</table>
+<input type="submit" value="Submit"></input>
+</form>
